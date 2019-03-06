@@ -6,17 +6,17 @@
 function crawler_page($filename, $year)
 {
 	$curlSession = curl_init();
-    curl_setopt($curlSession, CURLOPT_URL, "http://tides.mobilegeographics.com/calendar/year/$filename.html?y=$year&m=1&d=1");
+    curl_setopt($curlSession, CURLOPT_URL, "https://tides.mobilegeographics.com/calendar/year/$filename.html?y=$year&m=1&d=1");
     curl_setopt($curlSession, CURLOPT_BINARYTRANSFER, true);
     curl_setopt($curlSession, CURLOPT_RETURNTRANSFER, true);
 
     $jsonData = curl_exec($curlSession);
-	file_put_contents($filename."_".$year.".html", $jsonData, FILE_APPEND);
+	file_put_contents("2019/".$filename."_".$year.".html", $jsonData, FILE_APPEND);
     curl_close($curlSession);
 }
 for($j=2019; $j<=2019; $j++)
 {
-	for ($i=0; $i<=7166; $i++)
+	for ($i=0; $i<=9123; $i++)
 	{
 		crawler_page($i, $j);
 	}

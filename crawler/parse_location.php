@@ -103,15 +103,16 @@ function InsertRecordsWithoutHighByLatLong($links)
 	{
 		$array[$index] = $links[$i]->nodeValue;
 		
-		if($i>0 && $count%3 == 0) //get 3
+		if($i>0 && $count%2 == 0) //get 3
 		{
 			//print_r($array);			
 			
 			$N="";$W="";$S="";$E="";
 			
-			if($array[2] != "NULL")
+			if($array[1] != "NULL")
 			{			
-				$coords = explode(",", $array[2]);
+				$coords = explode(",", $array[1]);
+				//print_r($coords);exit;
 				
 				if(strpos($coords[0], "N") !== false)
 				{
@@ -155,8 +156,8 @@ function InsertRecordsWithoutHighByLatLong($links)
 			if($E == "") $long = "-" . trim($W);
 			else $long = trim($E);
 			
-			$sql .= "INSERT INTO `locations_1`(`id`, `location`, `name`, `file`, `latitude`, `longitude`) 
-			VALUES ('','$j','$location_name','$array[1]','$lat','$long');";		
+			$sql .= "INSERT INTO `locations`(`id`, `location`, `name`, `latitude`, `longitude`) 
+			VALUES ('','$j','$location_name','$lat','$long');";		
 			unset($array);
 			$index = 0;			
 			$j++;
