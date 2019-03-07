@@ -24,11 +24,12 @@ $app = new \Slim\App($settings);
 //Code here
 $app->get('/test/{location}/{year}/{month}/{begin}/{end}', function(Request $request, Response $response, array $args){
 	$location = $args['location'];
-	$date = $args['year']."-".$args['month'];
+	$year = $args['year'];
+	$month = $args['month'];
 	$begin = $args['begin'];
 	$end = $args['end'];
     $db = new DbOperations; 
-    $response_data = $db->GetTideCurrentByDate($location, $date, $begin, $end);
+    $response_data = $db->GetTideCurrentByDate($location, $year, $month, $begin, $end);
     $response->write(json_encode($response_data));
     return $response
     ->withHeader('Content-type', 'application/json')

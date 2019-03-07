@@ -9,14 +9,14 @@ class DbOperations{
 		$db = new DbConnect; 
 		$this->con = $db->connect(); 
 	}
-	public function GetTideCurrentByDate($location, $date, $begin, $end){
-	    $stmt = $this->con->prepare("SELECT * FROM tides_2018 WHERE location = ? AND date LIKE ? limit ?,?");
+	public function GetTideCurrentByDate($location, $year, $month, $begin, $end){
+	    $stmt = $this->con->prepare("SELECT * FROM tides_".$year." WHERE location = ? AND date LIKE ? limit ?,?");
 		$cond = "ssss";
-		$date = "%".$date."%";
+		$date = "%".$year."-".$month."%";
 		$stmt->bind_param($cond, $location, $date, $begin, $end);
 		if($stmt->execute())
 		{
-			$stmt->bind_result($id, $location, $date, $high1, $low1, $high2, $low2, $high3, $slack1, $flood1, $slack2, $ebb1, $slack3, $flood2, $slack4, $ebb2, $slack5, $flood3, $slack6, $moon, $sunrise, $sunset);
+			$stmt->bind_result($id, $location, $date, $high1, $low1, $high2, $low2, $high3, $slack1, $flood1, $slack2, $ebb1, $slack3, $flood2, $slack4, $ebb2, $slack5, $flood3, $slack6, $moon, $sunrise, $sunset, $moonrise, $moonset);
 			$results = array(); 
 			while($stmt->fetch()){ 
 				$result = array(); 
@@ -48,6 +48,8 @@ class DbOperations{
 				$result['moon'] = $moon; 
 				$result['sunrise'] = $sunrise; 
 				$result['sunset'] = $sunset; 
+				$result['moonrise'] = $moonrise; 
+				$result['moonset'] = $moonset; 
 				$results[$date] = $result;
 			}             
 		}
@@ -65,7 +67,7 @@ class DbOperations{
 		$longPlus = $long + $step;
 		$longAbstract = $long - $step;		
 		
-	    $stmt = $this->con->prepare("SELECT id, location, name, latitude, longitude FROM locations_1 WHERE (latitude < ? AND latitude > ?) AND (longitude < ? AND longitude > ?)");
+	    $stmt = $this->con->prepare("SELECT id, location, name, latitude, longitude FROM locations WHERE (latitude < ? AND latitude > ?) AND (longitude < ? AND longitude > ?)");
 		$stmt->bind_param("dddd", $latPlus, $latAbstract, $longPlus, $longAbstract);
 		
 		if($stmt->execute())
