@@ -16,7 +16,7 @@ function crawler_page($filename, $year)
 }
 for($j=2019; $j<=2019; $j++)
 {
-	for ($i=0; $i<=9123; $i++)
+	for ($i=9096; $i<=9123; $i++)
 	{
 		crawler_page($i, $j);
 	}

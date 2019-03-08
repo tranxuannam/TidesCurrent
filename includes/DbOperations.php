@@ -50,6 +50,11 @@ class DbOperations{
 				$result['sunset'] = $sunset; 
 				$result['moonrise'] = $moonrise; 
 				$result['moonset'] = $moonset; 
+				
+				foreach($result as $key => $value)
+				{
+					if(empty($value)) unset($result[$key]);
+				}
 				$results[$date] = $result;
 			}             
 		}
