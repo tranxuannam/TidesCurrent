@@ -22,14 +22,13 @@ $settings = require __DIR__ . '/../src/settings.php';
 $app = new \Slim\App($settings);
 
 //Code here
-$app->get('/test/{location}/{year}/{month}/{begin}/{end}', function(Request $request, Response $response, array $args){
+$app->get('/test/{location}/{date}/{begin}/{end}', function(Request $request, Response $response, array $args){
 	$location = $args['location'];
-	$year = $args['year'];
-	$month = $args['month'];
+	$date = $args['date'];
 	$begin = $args['begin'];
 	$end = $args['end'];
     $db = new DbOperations; 
-    $response_data = $db->GetTideCurrentByDate($location, $year, $month, $begin, $end);
+    $response_data = $db->GetTideCurrentByDate($location, $date, $begin, $end);
     $response->write(json_encode($response_data));
     return $response
     ->withHeader('Content-type', 'application/json')
