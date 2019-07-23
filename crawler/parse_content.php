@@ -1,92 +1,76 @@
 <?php
-function InsertRecordsWithHigh($links, $location)
+function array_title($type)
 {
-	$sql = "";
-	$month = 1;
-	$day = 1;
-	$array = Array();
-	$index = 0;
-	$count = 1;
-	for ($i=0; $i<sizeof($links); $i++)
+	$sql_insert = "INSERT INTO `tides_2019`(`id`, `location`, `date`" ;	
+	$flag = 1;
+	$i = 1;
+	$keys = array();
+	
+	for ($i; $i<sizeof($type); $i++)
 	{
-		$array[$index] = htmlentities($links[$i]->nodeValue);
-		
-		if($i>0 && $count%11 == 0) //get 10
+		if($type[$i]->nodeValue == 'Phase')
 		{
-			//print_r($array);
-			$sql .= "INSERT INTO `tides_2019`(`id`, `location`, `date`, `high1`, `low1`, `high2`, `low2`, `high3`, `slack1`, `flood1`, `slack2`, `ebb1`, `slack3`, `flood2`, `slack4`, `ebb2`, `slack5`, `flood3`, `slack6`, `moon`, `sunrise`, `sunset`, `moonrise`, `moonset`) 
-					VALUES ('', '$location', '2019-$month-$day', '$array[1]', '$array[2]', '$array[3]', '$array[4]', '$array[5]', '', '', '', '', '', '', '', '', '', '', '', '$array[6]', '$array[7]', '$array[8]', '$array[9]', '$array[10]');";	
-			unset($array);
-			$index = 0;
-			$day++;
-		}
-		else
-			$index++;
-		
-		if($i>0 && $i%11 == 0)
-		{
-			if(trim(substr($links[$i]->nodeValue, -2)) == "1")
-			{
-				$month++;
-				$day = 1;
-			}
-		}
-		$count++;
-	}
-	return $sql;	
-}
+			break;
+		}	
 
-function InsertRecordsWithoutHigh($links, $location)
-{
-	$sql = "";
-	$month = 1;
-	$day = 1;
-	$array = Array();
-	$index = 0;
-	$count = 1;
-	for ($i=0; $i<sizeof($links); $i++)
-	{
-		$array[$index] = htmlentities($links[$i]->nodeValue);
-		
-		if($i>0 && $count%17 == 0) //get 17
+		if(isset($keys[$type[$i]->nodeValue]))
 		{
-			//print_r($array);
-			$sql .= "INSERT INTO `tides_2019`(`id`, `location`, `date`, `high1`, `low1`, `high2`, `low2`, `high3`, `slack1`, `flood1`, `slack2`, `ebb1`, `slack3`, `flood2`, `slack4`, `ebb2`, `slack5`, `flood3`, `slack6`, `moon`, `sunrise`, `sunset`, `moonrise`, `moonset`) 
-					VALUES ('', '$location', '2019-$month-$day', '', '', '', '', '', '$array[1]', '$array[2]', '$array[3]', '$array[4]', '$array[5]', '$array[6]', '$array[7]', '$array[8]', '$array[9]', '$array[10]', '$array[11]', '$array[12]', '$array[13]', '$array[14]', '$array[15]', '$array[16]');";	
-			//print_r($sql);exit;
-			unset($array);
-			$index = 0;
-			$day++;
+			$keys[$type[$i]->nodeValue] = $keys[$type[$i]->nodeValue] + 1;
 		}
 		else
-			$index++;
-		
-		if($i>0 && $i%17 == 0)
 		{
-			if(trim(substr($links[$i]->nodeValue, -2)) == "1")
-			{
-				$month++;
-				$day = 1;
-			}
+			$keys[$type[$i]->nodeValue] = 1;
 		}
-		$count++;
+		$sql_insert .= strtolower(", `" . $type[$i]->nodeValue) . $keys[$type[$i]->nodeValue] . "`";
 	}
-	return $sql;	
+	//print_r($sql_insert);exit;
+	return array( "count" => $i - 1 , "query" => $sql_insert . ", `moon`, `sunrise`, `sunset`, `moonrise`, `moonset`)");
 }
 
 function InsertRecordsWithTypes($links, $type, $location)
 {
-	if(isset($type[1]->nodeValue))
+	$sql = "";
+	$sql_value = "";
+	$month = 1;
+	$day = 1;
+	$array = Array();
+	$index = 0;
+	$count = 1;
+	
+	$arr_title = array_title($type);
+	
+	for ($i=0; $i<sizeof($links); $i++)
 	{
-		if($type[1]->nodeValue == 'High')
+		$sql_value = " VALUES ('', '$location', '2019-";
+		$array[$index] = htmlentities($links[$i]->nodeValue);
+		
+		if($i>0 && $count%($arr_title["count"] + 6) == 0) //6 is `day`, `moon`, `sunrise`, `sunset`, `moonrise`, `moonset`
 		{
-			return InsertRecordsWithHigh($links, $location);
+			$sql_value .= "$month-$day'";	
+			for ($k = 1; $k <= $arr_title["count"] + 5; $k++) // 5 is `moon`, `sunrise`, `sunset`, `moonrise`, `moonset`
+			{
+				$sql_value .= ",'$array[$k]'";			
+			}
+			$sql .= $arr_title["query"] . $sql_value . ");";// . "</br></br>";			
+			unset($array);
+			$index = 0;
+			$day++;
 		}
 		else
+			$index++;
+		
+		if($i>0 && $i%($arr_title["count"] + 6) == 0)
 		{
-			return InsertRecordsWithoutHigh($links, $location);
+			if(trim(substr($links[$i]->nodeValue, -2)) == "1")
+			{
+				$month++;
+				$day = 1;
+			}
 		}
+		$count++;
 	}
+	//print_r($sql);exit;
+	return $sql;	
 }
 
 function execute_sql($sql_query)
@@ -126,67 +110,5 @@ function get_data($year, $from, $to)
 	}
 }
 
-/*
-for($j=2018; $j<=2018; $j++)
-{
-	for ($i=0; $i<=7166; $i++)
-	{
-		$filename = $i.'_'.$j.'.txt';
-		$html = file_get_contents($filename);
-		@$dom = DOMDocument::loadHTML($html); 
-		$xpath = new DOMXpath($dom);		 
-		$links = $xpath->query( '//table//tr//td//small' );
-		$conds = $xpath->query( '//table//tr//th//small' );
-		InsertRecordsWithTypes($links, $conds, $i);
-	}
-}
-*/
-get_data(2019, 0, 2);
-
-
-/*
-$sql_query = get_data(2018, 501, 1000);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 1001, 1500);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 1501, 2000);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 2001, 2500);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 2501, 3000);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 3001, 3500);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 3501, 4000);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 4001, 4500);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 4501, 5000);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 5001, 5500);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 5501, 6000);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 6001, 6500);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 6501, 7000);
-execute_sql($sql_query);
-
-$sql_query = get_data(2018, 7001, 7166);
-execute_sql($sql_query);
-*/
-
-
+get_data(2019, 2548, 2548); //9001
 ?>
