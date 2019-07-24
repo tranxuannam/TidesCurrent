@@ -110,5 +110,5 @@ function get_data($year, $from, $to)
 	}
 }
 
-get_data(2019, 2548, 2548); //9001
+get_data(2019, $argv[1], $argv[2]); //9001
 ?>
