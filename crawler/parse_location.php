@@ -1,6 +1,6 @@
 <?php
 
-$html = file_get_contents("location_name.txt");
+$html = file_get_contents("location_name_old.txt");
 
 //Parse it. Here we use loadHTML as a static method
 //to parse the HTML and create the DOM object in one go.
@@ -13,10 +13,10 @@ $xpath = new DOMXpath($dom);
 $links = $xpath->query( '//tr//td' );
  
 //Display the results as in the previous example
-foreach($links as $link){
-    //echo $link->getAttribute('href'), '<br>';
-	//echo $link->nodeValue, '<br>';
-}
+// foreach($links as $link){
+//     echo $link->getAttribute('href'), '<br>';
+// 	echo $link->nodeValue, '<br>';
+// }
 
 function InsertRecordsWithoutHigh($links)
 {
@@ -90,7 +90,7 @@ function InsertRecordsWithoutHigh($links)
 	}
 	return $sql;	
 }
-//echo InsertRecordsWithoutHigh($links);
+// echo InsertRecordsWithoutHigh($links);
 
 function InsertRecordsWithoutHighByLatLong($links)
 {
@@ -99,14 +99,12 @@ function InsertRecordsWithoutHighByLatLong($links)
 	$array = Array();
 	$index = 0;
 	$count = 1;
-	for ($i=0; $i<sizeof($links); $i++)
+	$i = 0;
+	foreach($links as $link)
 	{
-		$array[$index] = $links[$i]->nodeValue;
-		
+		$array[$index] = $link->nodeValue;
 		if($i>0 && $count%2 == 0) //get 3
-		{
-			//print_r($array);			
-			
+		{			
 			$N="";$W="";$S="";$E="";
 			
 			if($array[1] != "NULL")
@@ -156,8 +154,7 @@ function InsertRecordsWithoutHighByLatLong($links)
 			if($E == "") $long = "-" . trim($W);
 			else $long = trim($E);
 			
-			$sql .= "INSERT INTO `locations`(`id`, `location`, `name`, `latitude`, `longitude`) 
-			VALUES ('','$j','$location_name','$lat','$long');";		
+			$sql .= 'INSERT INTO `locations_new`(`id`, `location`, `name`, `latitude`, `longitude`, `code`) VALUES ('.($j + 1).','.$j.',"'.$location_name.'",'.$lat.','.$long.',"'.strtoupper(generateRandomString(8)).'",'.');';		
 			unset($array);
 			$index = 0;			
 			$j++;
@@ -166,8 +163,14 @@ function InsertRecordsWithoutHighByLatLong($links)
 			$index++;		
 		
 		$count++;
+		$i++;
 	}
 	return $sql;	
 }
+
+function generateRandomString($length = 10) {
+    return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($length/strlen($x)) )),1,$length);
+}
+
 echo InsertRecordsWithoutHighByLatLong($links);
 ?>
